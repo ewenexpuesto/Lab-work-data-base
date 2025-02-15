@@ -1,0 +1,416 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<html> <head>
+<title></title>
+<meta http-equiv="content-type" content="text/html;charset=iso-8859-1">
+<link rel="stylesheet" type="text/css"
+href="stylesheet.css">
+<!--href="../../../../templates/se2010/stylesheet.css">-->
+<title>ENSIIE -- S1-IBD</title>
+</head>
+<!--href="../../../../templates/se2010/stylesheet.css">-->
+<body>
+<h1>IBD -- TP SQL : Langage de Manipulation de Donn&eacute;es </h1>
+<hr>
+
+<h2>Pr&eacute;ambule</h2>
+
+<!--
+<p>
+<b>Notations. </b>
+<ul>  
+  <li> La notation <tt>[x]</tt> signifie que l'argument <tt>x</tt> est
+  facultatif et qu'il peut &ecirc;tre omis pour la valeur par
+  d&eacute;faut (mais pas pour les autres valeurs).
+  </li>
+  <li> La couleur orange
+  sur un mot <tt><font color="orange">x</font></tt> a pour signification
+  : remplacer <tt><font color="orange">x</font></tt> par l'instance
+  appropri&eacute;e. Par exemple, si votre login est
+  <tt>sherlock.holmes</tt>, il faut remplacer <tt><font
+  color="orange">login</font></tt> par
+  <tt>sherlock.holmes</tt>. &Eacute;l&eacute;mentaire...  </li>
+</ul>
+</p>
+-->
+
+<p>
+<b> Sch&eacute;ma de la base de donn&eacute;es.</b>
+Nous travaillerons sur la base de donn&eacute;es <tt>Vins</tt> vue en
+TD. Le sch&eacute;ma utilis&eacute; pour le TP sera le suivant :
+<br><br>
+
+<tt>
+-- Tables: d&eacute;finition<br>
+Viticulteur(#n_viticulteur, nom, prenom, v_ville)<br>
+Vin(#n_vin, cru, millesime, region, n_viticulteur=>Viticulteur)<br>
+Buveur(#n_buveur, nom, prenom, b_ville) <br>
+Commande(#n_commande, n_buveur=>Buveur,  n_vin=>Vin, c_date, c_qte) <br>
+Livraison(#(n_commande=>Commande, l_date), l_qte)<br><br>
+
+-- Tables: contraintes<br>
+-- Vin <br>
+cle(cru, millesime, n_viticulteur)<br>
+millesime &#x02208; ]1970, 2013[ <br>
+-- Commande <br>
+cle(n_buveur, n_vin, c_date)<br>
+c_qte &#x02208; {6, 12, 18}
+</tt>
+</p>
+
+<p>
+<b> Cr&eacute;ation de la base de donn&eacute;es pour le TP.</b> 
+Les d&eacute;tails de la proc&eacute;dure sont disponibles <a
+href="http://www.ensiie.fr/~szafranski/cours/IBD/tp/procedure_connexion.html"
+target=_blank>ici</a>, avec la signification du code couleur et des
+notations utilis&eacute;s. 
+<ul>
+  <li>Cr&eacute;ez un r&eacute;pertoire de travail pour le TP et
+  placez-vous dans ce r&eacute;pertoire.</li>
+  <li>Connectez-vous &agrave; votre base de donn&eacute;es
+  g&eacute;n&eacute;rique.</li>
+  <li>Cr&eacute;ez une base de donn&eacute;es <tt><font color=orange>xx</font>_vins</tt>
+  pour le TP. Pensez &agrave; int&eacute;grer au nom de la base une
+  cha&icirc;ne de caract&egrave;res (<tt><font color=orange>xx</font></tt>) qui la
+  distinguera de celles de vos camarades.<br>
+  </li>
+  <li> Connectez-vous &agrave; cette base de donn&eacute;es et
+  commencez le TP.
+  </li>
+</ul>
+</p>
+
+<p>
+<b> Cr&eacute;ation du sch&eacute;ma et alimentation de la base de donn&eacute;es <tt>
+ vins</tt>.</b>
+Les fichiers permettant de cr&eacute;er et de remplir la base de donn&eacute;es sont
+disponibles sous <tt>/pub/FISE_CBDR11/TP/tp_sql_lmd/</tt>.  
+<!--Copiez l'ensemble des
+fichiers <font color=blue>dans le r&eacute;pertoire &agrave; partir 
+duquel vous avez lanc&eacute l'interpr&eacuteteur <tt> PostgreSQL</tt></font> 
+puis--> 
+Ex&eacute;cutez les commandes suivantes :<br><br>
+
+<tt>
+<font color=orange>xx</font>_vins=&gt; \i /pub/FISE_CBDR11/TP/tp_sql_lmd/create_vins.sql <br> 
+<font color=orange>xx</font>_vins=&gt; \i /pub/FISE_CBDR11/TP/tp_sql_lmd/fill_all.sql<br><br>
+</tt>
+
+Examinez le sch&eacute;ma de la base de donn&eacute;es <tt><font color=orange>xx</font>_vins</tt>
+et son contenu : <br><br>
+
+<tt>
+<font color=orange>xx</font>_vins=&gt; \d <font color=orange>nom_table</font><br>
+<font color=orange>xx</font>_vins=&gt; SELECT * FROM  <font color=orange>nom_table</font><font color=red>;</font>
+</tt>
+</p>
+
+
+<p>
+<b>Rappels. </b>
+<ul>
+  <li> <font color=red>Toute commande SQL se termine par un </font>
+       <font color=red><tt>;</tt></font><font color=red>.</font><br>
+  Par exemple: <tt><font color=gray>SELECT * FROM <font color=orange>nom_table</font></font><font color=red>;</font></tt> 
+  </li>
+  <li> <font color=blue> Les commandes <tt>PostgreSQL</tt> <b>NE</b> 
+  se terminent <b>PAS</b> 
+  par un <tt>;</tt></font>.<br>
+  Par exemple: <tt> <font color=gray>\d <font color=orange> nom_table</font></font> </tt> 
+  <b>ET PAS</b> <tt> <font color=gray>\d <font color=orange> nom_table</font></font><font color=red><s>;</s></font></tt>  
+  </li>
+</ul>
+</p>
+
+<h2>Projections et restictions</h2>
+
+<p>
+Les questions li&eacute;es &agrave; cette partie portent sur des
+op&eacute;rations de projection et de restriction concernant une seule
+relation.
+
+<ol>
+  <li> Liste des noms des buveurs.
+  </li>
+  <li> Liste des <em>diff&eacute;rentes</em> villes o&ugrave; habitent les
+  viticulteurs. La lsite doit &ecirc;tre tri&eacute;e par ordre
+  alphab&eacute;tique d&eacute;croissant.
+  </li>
+  <li> Liste des num&eacute;ros de commande et de la quantit&eacute;
+  associ&eacute;e pour les commandes dont la quantit&eacute; est
+  comprise entre 6 et 15 (bornes comprises).
+  </li>
+  <li> Liste des commandes livr&eacute;es apr&egrave;s le 25/12/2002.
+  </li> 
+  <li> Num&eacute;ros, crus et r&eacute;gions des vins dont la
+  r&eacute;gion commence par <tt>'BO'</tt> ou se termine par
+  <tt>'NE'</tt>.
+  </li>
+</ol>
+</p>
+
+<h2>Jointures et requ&ecirc;tes d'existence ou de comparaison</h2>  
+
+<p> <b>Questions pr&eacute;alables.</b><br>
+
+<ul>
+  <li>Ex&eacute;cutez la requ&ecirc;te suivante :<br>
+  <tt><div>
+    SELECT *<br>
+    FROM vin NATURAL JOIN viticulteur<font color=red>;</font><br>
+  </div></tt>
+  Sur quels les attributs portent la jointure ? Quel est le
+  sch&eacute;ma du r&eacute;sultat de la requ&ecirc;te ?
+  </li>
+</ul>
+
+<ul>
+  <li> Ex&eacute;cutez la requ&ecirc;te suivante :<br>
+  <tt><div>
+    SELECT *<br>
+    FROM vin, viticulteur vit <br>
+    WHERE vin.n_viticulteur = vit.n_viticulteur<font color=red>;</font><br>
+  </div></tt>
+  Pourquoi les attributs <tt>n_viticulteur</tt> sont ils
+  pr&eacute;fix&eacute;s ?  Quel est le sch&eacute;ma du
+  r&eacute;sultat de la requ&ecirc;te ?  &Agrave; partir de quelle 
+  op&eacute;ration est-il obtenu ?
+  </li>
+</ul>
+
+<ul>
+  <li>Ex&eacute;cutez la requ&ecirc;te suivante :<br>
+  <tt><div>
+    SELECT *<br>
+    FROM buveur NATURAL JOIN viticulteur<font color=red>;</font><br>
+  </div></tt>
+  Pourquoi le r&eacute;sultat est-il vide ?
+  </li>
+</ul>
+
+<ul>
+  <li> Que se passe-t-il lorsque vous ex&eacute;cutez les requ&ecirc;tes 
+  suivantes ? 
+  <br>
+
+  <tt><div>
+    SELECT * <br>FROM buveur JOIN viticulteur USING (nom, prenom)<font color=red>;</font> <br>
+  </div></tt>
+  Expliquez le r&eacute;sultat.
+  </li>
+</ul>
+
+<ul>
+  <li> Modifiez le sch&eacute;ma des tables <tt>buveur</tt> et
+  <tt>viticulteur</tt> pour que les noms des attributs correspondant
+  aux villes soient diff&eacute;rents : <br>
+  <tt><div>
+    ALTER TABLE buveur RENAME ville TO b_ville<font color=red>;</font> <br>
+    ALTER TABLE viticulteur RENAME ville TO v_ville<font color=red>;</font>
+  </div></tt>
+  </li>
+</ul>
+</p>
+
+<p> <b>Questions principales.</b> Pour les trois premi&egrave;res
+requ&ecirc;tes, exprimez les jointures &agrave; la fois:
+
+<ul>
+  <li> Dans la clause <tt>WHERE</tt> et la clause <tt>AND</tt> le cas 
+  &eacute;ch&eacute;ant (<tt>SQL-89</tt>). 
+  </li>
+
+  <li> Dans la clause <tt>FROM</tt> (<tt>SQL-92</tt>).
+  </li>
+</ul>
+
+Les jointures devront ensuite &ecirc;tre exprim&eacute;es dans la
+clause <tt>FROM</tt>.
+
+<ol>
+
+  <li> Num&eacute;ros et noms des diff&eacute;rents viticulteurs qui
+  proposent des vins de <tt>'LOIRE'</tt> de millesime
+  <tt>1993</tt>. <br>
+  R&eacute;ponse: 1 tuple.
+  </li>
+
+  <li> Num&eacute;ros et noms des buveurs ayant command&eacute; un vin
+  de cru <tt>'POMMARD'</tt>. <br>
+  R&eacute;ponse: 4 tuples.
+  </li>
+
+  <li>Noms des viticulteurs &agrave; qui le buveur <tt>'DUPOND'</tt> a
+  command&eacute; du vin. <br>
+  R&eacute;ponse: 2 tuples.
+  </li>
+
+  <li>Num&eacute;ros et noms des viticulteurs qui habitent la
+    m&ecirc;me ville qu'un de leurs clients. <br>
+  R&eacute;ponse: 1 tuple.
+  </li>
+
+  <li>Num&eacute;ros et noms des buveurs qui n'ont rien
+    command&eacute;. Vous exprimerez cette requ&ecirc;te de 3
+    fa&ccedil;ons :
+ 
+  <ul>
+    <li> a) en testant l'appartenance (ou pas) &agrave; un ensemble,
+    <br> 
+      <tt>(NOT) IN</tt> ou <tt>EXCEPT</tt>
+    </li>
+
+    <li> b) en testant les propri&eacute;t&eacute;s que certains 
+      attributs doivent v&eacute;rifier, <br>
+    <tt>(NOT) EXISTS</tt> ou <tt>ALL (ANY)</tt>
+    </li>
+
+    <li> c) en testant le r&eacute;sultat d'une jointure externe. <br>
+    <tt>[LEFT/RIGHT] OUTER JOIN|</tt>
+    </li>
+  </ul>
+  R&eacute;ponse: 7 tuples.
+  </li>
+
+  <li>Liste des crus qui ont &eacute;t&eacute; command&eacute;s mais
+  pas en quantit&eacute; sup&eacute;rieure ou &eacute;gale &agrave;
+  12, en utilisant les m&ecirc;mes approches que
+  pr&eacute;c&eacute;demment. <br>
+  R&eacute;ponse: 3 tuples.
+  </li>
+
+  <li>Num&eacute;ros et noms des buveurs qui n'ont command&eacute;
+      <em>que</em> des vins de la r&eacute;gion de
+      <tt>'BOURGOGNE'</tt>, en utilisant les approches a) et b)
+      pr&eacute;sent&eacute;es pr&eacute;c&eacute;demment. <br>
+  R&eacute;ponse: 3 tuples.
+  </li>
+
+  <li>Num&eacute;ros et noms des buveurs qui n'ont command&eacute;
+      <em>que</em> des vins des r&eacute;gions de <tt>'BOURGOGNE'</tt>
+      <em>et</em> de <tt>'BORDEAUX'</tt>, en utilisant les approches
+      a) et b) pr&eacute;sent&eacute;es
+      pr&eacute;c&eacute;demment. <br>
+  R&eacute;ponse: 1 tuple.
+  </li>
+
+  <li>Liste des villes dans lesquelles se trouvent soit un viticulteur
+      soit un buveur. <br>
+  R&eacute;ponse: 17 tuples.
+</ol>
+</p>
+
+<h2> Fonctions de calcul et agr&eacute;gats</h2>
+
+<p><b>Questions principales.</b>
+
+<ol>
+  <li> Nombre de crus diff&eacute;rents. <br>
+  R&eacute;ponse: 13.
+  </li>
+
+  <li>Quantit&eacute; totale des vins livr&eacute;s en 2001. Utilisez
+  l'op&eacute;rateur <tt>BETWEEN</tt> dans une premi&egrave;re
+  requ&ecirc;te et la fonction <tt>EXTRACT()</tt> dans une seconde
+  requ&ecirc;te.<br>
+  R&eacute;ponse: 24.
+  </li>
+
+  <li>Nombre de vins diff&eacute;rents de chaque
+  r&eacute;gion. Affichez le nombre de vins dans une colonne
+  nomm&eacute;e "nombre de vins".  <br>
+  R&eacute;ponse: <tt>LOIRE : 6</tt>, <tt>CHAMPAGNE : 2</tt>,
+  <tt>BORDEAUX : 5</tt>, <tt>BOURGOGNE: 4</tt>.
+
+  <li> Nombre de vins diff&eacute;rents produits par chaque
+  viticulteur. Affichez le num&eacute;ro et le nom de chaque
+  viticulteur puis nombre de vins produits dans une colonne
+  nomm&eacute;e "nombre de vins" et ordonnez le r&eacute;sultat en
+  fonction du nombre de vins produits. <br>
+  R&eacute;ponse: 8 viticulteurs produisent 1 vin, 3 viticulteurs
+  produisent 2 vins et 1 viticulteur produit 3 vins.
+  </li>
+
+  <li> Quantit&eacute; de vin moyenne command&eacute;e pour chaque buveur habitant
+  <tt>'PARIS'</tt>. Affichez le num&eacute;ro et le nom de chaque buveur puis
+  la quantit&eacute; de vin moyenne command&eacute;e dans une colonne "quantit&eacute;
+  moyenne command&eacute;e". <br>
+  R&eacute;ponse: <tt> MAURY: 12</tt>, <tt>DUPONT: 6</tt>,
+  <tt>GAUTHIER: 12</tt>.
+  </li>
+
+  <li> Quantit&eacute; de vin totale command&eacute;e pour chaque
+  buveur dont la quantit&eacute; de vin moyenne command&eacute;e est
+  sup&eacute;rieure ou &eacute;gale &agrave; 12. Affichez le
+  num&eacute;ro et le nom de chaque buveur puis la quantit&eacute; de
+  vin totale command&eacute;e dans une colonne "quantit&eacute; totale
+  command&eacute;e". <br>
+  R&eacute;ponse: <tt>GAUTHIER: 12</tt>, <tt>MAURY: 24</tt>,
+  <tt>FRADET: 30</tt>. 
+  </li>
+
+  <li> Num&eacute;ros et noms des viticulteurs qui produisent au moins
+  deux vins de crus diff&eacute;rents. Affichez le num&eacute;ro et le
+  nom de chaque viticulteur puis le nombre total de vins produits dans
+  une colonne "nombre de vins produits". <br>
+  R&eacute;ponse: <tt>VALLE: 3</tt>, <tt>COULIS DUTHEIL: 2</tt>,
+  <tt>PARENT: 2</tt>, <tt>MEDEVILLE: 2</tt>.
+  </li>
+</ol>
+</p>
+
+<p><b>Questions suppl&eacute;mentaires.</b>
+
+<ol>
+  <li> Nombre de villes diff&eacute;rentes chez les personnes
+  enregistr&eacute;es dans la table <tt>buveur</tt>.
+  </li>
+
+  <li> Quantit&eacute; totale des vins command&eacute;s en 2002.
+  </li>
+  
+  <li> Nombre de viticulteurs diff&eacute;rents de chaque
+  r&eacute;gion. Affichez le nombre de viticulteurs dans une colonne
+  nomm&eacute;e "nombre de viticulteurs".
+  </li>
+
+  <li> Nombre de vins diff&eacute;rents command&eacute;s par chaque
+  buveur. Affichez le num&eacute;ro et le nom de chaque buveur puis le
+  nombre de vins command&eacute;s dans une colonne nomm&eacute;e
+  "nombre de vins command&eacute;s". Faites la requ&ecirc;te en
+  int&eacute;grant dans un premier temps les buveurs qui n'ont rien
+  command&eacute;, puis en les &eacute;liminant dans un second temps.
+  </li>
+  
+  <li> Quantit&eacute; de vin moyenne vendue pour chaque viticulteur
+  de la r&eacute;gion <tt>'BOURGOGNE'</tt>. Affichez le num&eacute;ro
+  et le nom de chaque viticulteur puis la quantit&eacute; de vin
+  moyenne vendue dans une colonne "quantit&eacute; moyenne vendue".
+  </li>
+  
+  <li> Quantit&eacute; de vin totale vendue pour chaque viticulteur
+  dont la quantit&eacute; de vin moyenne vendue est sup&eacute;rieure
+  ou &eacute;gale &agrave; 12. Affichez le num&eacute;ro et le nom de
+  chaque viticulteur puis la quantit&eacute; de vin totale vendue dans
+  une colonne "quantit&eacute; totale vendue".
+  </li>
+  
+  <li> Num&eacute;ros et noms des buveurs qui ont command&eacute; au
+  moins deux vins de crus diff&eacute;rents. Affichez le num&eacute;ro
+  et le nom de chaque buveur puis le nombre total de vins
+  command&eacute;s dans une colonne "nombre de vins command&eacute;s".
+  </li>
+  
+  <li> Num&eacute;ros et noms des buveurs qui ont command&eacute; au
+  moins deux vins de crus diff&eacute;rents de la m&ecirc;me
+  r&eacute;gion. Affichez le num&eacute;ro et le nom de chaque buveur
+  puis la r&eacute;gion et le nombre total de vins command&eacute;s
+  par r&eacute;gion dans une colonne "nombre de vins command&eacute;s".
+  </li>
+</ol>
+</p>
+
+<hr>
+<address></address>
+<!-- hhmts start -->Last modified: Wed Sep  4 15:33:08 CEST 2019 <!-- hhmts end -->
+</body> </html>
+

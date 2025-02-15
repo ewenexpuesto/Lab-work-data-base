@@ -1,0 +1,231 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<html> <head>
+<title></title>
+<meta http-equiv="content-type" content="text/html;charset=iso-8859-1">
+<link rel="stylesheet" type="text/css"
+href="stylesheet.css"> 
+<!--href="../../../../templates/se2010/stylesheet.css">-->
+<title>ENSIIE -- S1-IBD</title>
+</head>
+<body>
+<h1>IBD -- Élements de d&eacute;marrage sous PostgreSQL</h1>
+<hr>
+
+<h2>Pr&eacute;ambule</h2>
+
+<p>
+<b> L'interpr&eacute;teur <tt>psql</tt> </b>
+<!--Nous utiliserons l'interpr&eacute;teur <tt>psql</tt> de
+<tt>PostgreSQL</tt>.
+-->
+
+est une interface en mode texte pour le SGBD <tt>PostgreSQL</tt> (doc
+disponible <a target=_blank, href=
+http://www.postgresql.org/docs> ici</a>) qui
+vous permettra de saisir des instructions pour :
+<ul>
+  <li> D&eacute;finir la structure d'une base de donn&eacute;es (LDD). 
+  </li>
+  <li> Remplir et interroger une base de donn&eacute;es (LMD).
+  </li>
+  <li> D&eacute;finir les utilisateurs qui auront acc&egrave;s
+  &agrave; une cette base de donn&eacute;es ainsi que leurs droits
+  d'acc&egrave;s aux donn&eacute;es (LCD).
+  </li>
+</ul>
+
+Dans ce TP, les instructions &agrave; ex&eacute;cuter seront
+report&eacute;es comme &eacute;tant saisies directement sous
+l'interpr&eacute;teur <tt>psql</tt>. <font color="red"> Il est
+cependant vivement recommand&eacute; d'utiliser des fichiers
+<tt>.sql</tt> </font> sp&eacute;cifiques &agrave; chaque TP. Dans
+l'ordre:
+
+<ol>
+  <li> Cr&eacute;er un r&eacute;pertoire pour l'UE BD (par exemple
+  <tt>IBD</tt>). 
+  </li>
+  <li> Cr&eacute;er le r&eacute;pertoire correspondant au TP (par
+    exemple <tt>TP1</tt>).
+  </li>
+  <li> Cr&eacute;er un fichier dont l'extension sera
+  <tt>.sql</tt> (par exemple <tt>tp1.sql</tt>) et qui contiendra
+  l'ensemble des instructions dont vous aurez besoin pour TP. (Et pour
+  r&eacute;viser enuite. Eh oui...)
+  </li>
+</ol>
+
+Il est d'ailleurs possible d'ex&eacute;cuter un fichier de script
+<tt>PostgreSQL</tt> depuis l'interpr&eacute;teur <tt>psql</tt> et
+&eacute;galement de r&eacute;cup&eacute;rer le r&eacute;sultat des
+instructions ex&eacute;cut&eacute;es dans un fichier (cf.<a
+href="procedure_connexion.html#cb"> ici</a>).  </p>
+
+<p>
+<b>Notations et code couleur. </b>
+<ul>  
+  <li> La notation <tt>[x]</tt> signifie que l'argument <tt>x</tt> est
+facultatif et qu'il peut &ecirc;tre omis pour la valeur par
+  d&eacute;faut (mais pas pour les autres valeurs).
+  </li>
+  <li> La couleur orange
+sur un mot <tt><font color="orange">x</font></tt> a pour signification
+: remplacer <tt><font color="orange">x</font></tt> par l'instance
+appropri&eacute;e. Par exemple, si votre login est
+<tt>sherlock.holmes</tt>, il faut remplacer <tt><font
+color="orange">login</font></tt> par
+<tt>sherlock.holmes</tt>. &Eacute;l&eacute;mentaire...  </li>
+  <li> <div>Les instructions <tt> SQL</tt> encadr&eacute;es en
+    pointill&eacute;s sont &agrave;
+ex&eacute;cuter dans l'interpr&eacute;teur <tt>PostgreSQL</tt>.</div>
+  </li>
+  </ul>
+</p>
+
+<h2>Connexion et cr&eacute;ation d'une base de donn&eacute;es
+</tt></h2> 
+
+<p>
+Dans les salles TP, l'acc&egrave;s au serveur <tt>PostgreSQL</tt> se
+fait avec la commande suivante et le mot de passe de votre compte
+p&eacute;dago : <br>
+<tt>
+login@votre_machine:~$ psql -h pgsql<br>
+Mot de passe :
+</tt>
+<br><br>
+
+Cela vous connecte &agrave; une base de donn&eacute;es
+g&eacute;n&eacute;rique qui a pour nom votre login p&eacute;dago : <br>
+<tt>
+login=> 
+</tt>
+<br><br>
+
+&Agrave; partir de cette base de donn&eacute;es
+g&eacute;n&eacute;rique, nous allons cr&eacute;er une base de
+donn&eacute;es d&eacute;di&eacute;e au TP. <br><br>
+
+<font color="#FF0000">Attention</font>, il est important que votre
+base de donn&eacute;es ait un nom diff&eacute;rent de celles de
+vos camarades. Nous pouvons utiliser par exemple votre login pour
+nommer cette base. <br>
+
+<font color="#FF0000">Attention encore</font>, un nom de base de
+donn&eacute;es ne peut pas contenir le caract&egrave;re <tt>.</tt>.
+Nous allons donc utiliser un login modifi&eacute; (<tt>loginbis</tt>)
+pour nommer cette base. Vous pouvez remplacer le caract&egrave;re
+<tt>.</tt> entre le pr&eacute;nom et le nom de votre login par le
+caract&egrave;re <tt>_</tt>. Par exemple si <tt><font
+color="orange">login</font></tt> &eacute;tait <tt>sherlock.holmes</tt>
+alors <tt><font color="orange">loginbis</font></tt> sera
+<tt>sherlock_holmes</tt>. Él&eacute;mentaire...<br><br>
+
+Vous pouvez maintenant cr&eacute;er la base de donn&eacute;es :<br>
+<tt>
+login=> create database tp_vins_<font color="orange">loginbis</font>; <br>
+login=> \q
+</tt>
+<br><br>
+
+
+Enfin, on se connecte sur la base cr&eacute;&eacute;e, toujours avec
+son mot de passe p&eacute;dago :<br>
+<tt>
+login@votre_machine:~$ psql -h pgsql -d tp_vins_<font
+color="orange">loginbis</font> <br> 
+Mot de passe : 
+</tt> 
+</p>
+
+<h2 id=cb><tt>PostgreSQL</tt> et <tt>psql</tt></h2>
+
+<p>
+<b id="cb">Commandes de base. </b> Les principales commandes de <tt> psql </tt> sont
+les suivantes :
+<ul>
+  <li><tt>\?</tt> : liste des commandes <tt> psql</tt>,
+  </li>
+  <li><tt>\h</tt> : liste des instructions <tt> SQL</tt>,
+  </li>
+  <li> <tt>\h &lt;une_instruction&gt;</tt> : description de
+  l'instruction <tt> SQL</tt>
+  <tt>&lt;une_instruction&gt;</tt>. Essayez avec l'instruction <tt>
+  CREATE TABLE</tt>,
+  </li>
+  <li><tt>\d</tt> : liste des tables (ou relations), 
+  </li>
+  <li><tt>\d &lt;nom_table&gt;</tt> : description de la table
+  <tt>&lt;nom_table&gt;</tt>,
+  </li>
+  <li><tt>\i &lt;chemin/nom_fichier_script.sql&gt;</tt> :
+  ex&eacute;cution d'un fichier de script <tt> SQL</tt>,
+  </li>
+  <li> <tt>\o &lt;chemin/nom_fichier_resultat.sql&gt;</tt> :
+  &eacute;criture du r&eacute;sultat des instructions dans le
+  fichier pass&eacute; en param&egrave;tre,
+  </li>
+  <li><tt>\o</tt> : retour &agrave; un affichage &agrave;
+  l'&eacute;cran,
+  </li>
+  <li><tt>\q</tt> : quitter <tt> psql</tt>.
+  </li>
+</ul>
+Retenez ces commandes, elles seront indispensables pour les TP.
+</p>
+
+<p>
+
+<b>Instruction <tt>SQL</tt>.</b> Une instruction <tt>SQL</tt> peut
+s'&eacute;crire sur une ou plusieurs lignes. Le retour chariot n'a pas
+d'incidence : <font color="red">c'est le caract&egrave;re <tt>;</tt>
+qui termine une instruction et permet son
+ex&eacute;cution</font>. Ainsi, les deux instructions suivantes sont
+&eacute;quivalentes.<br><br>
+
+<tt>
+tp_vins_loginbis=&gt; SELECT * FROM <font
+color="orange">nom_table</font><font color="red">;</font><br> 
+resultat<br>
+tp_vins_loginbis=&gt;
+<br><br>
+
+tp_vins_loginbis=&gt; SELECT * <br>
+tp_vins_loginbis-=&gt; FROM <font color="orange">nom_table</font><font
+color="red">;</font><br> 
+resultat<br>
+tp_vins_loginbis=&gt;<br>
+</tt>
+<br>
+
+Notez la diff&eacute;rence dans le prompt entre les caract&egrave;res
+<tt>=&gt;</tt> et <tt>=-</tt> selon que l'on a effectu&eacute;, ou pas,
+un retour chariot et valid&eacute;, ou pas, l'instruction. On peut
+&eacute;galement avoir le signe <tt(&gt;</tt> lorsqu'une
+parenth&egrave;se n'a pas &eacute;t&eacute; ferm&eacute;e.
+
+Des commentaires peuvent &ecirc;tre ins&eacute;r&eacute;s dans une
+instruction <tt>SQL</tt> :
+<ul>
+  <li>Soit par les caract&egrave;res <tt>--</tt>, dans ce cas la partie
+  comment&eacute;e s'&eacute;tend jusqu'&agrave; la fin de la ligne
+  courante, 
+  </li>
+  <li>Soit par les d&eacute;limiteurs <tt>/* ceci est un commentaire
+  */</tt>, comme en <tt>C</tt>.
+  </li>
+</ul>
+
+La casse n'a aucune influence sur les instructions <tt>SQL</tt> :
+<tt>SELECT * FROM <font color="orange">nom_table</font>;</tt> est &eacute;quivalent
+&agrave; <tt>select * from <font
+color="orange">nom_table</font>;</tt>. <br> <br> N&eacute;anmoins, 
+il est plus lisible de mettre en lettres majuscules les
+<tt>INSTRUCTIONS</tt> et en lettres minuscules les noms des
+<tt>tables</tt>, les <tt>attributs</tt>, etc.
+</p>
+<hr>
+<address></address>
+<!-- hhmts start -->Last modified: Wed Sep  4 14:54:52 CEST 2019 <!-- hhmts end -->
+</body> </html>
+
